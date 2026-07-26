@@ -136,6 +136,17 @@ final class UsageStore {
             snap.todayCost = todayRow.totalCost
             snap.todayTokens = todayRow.totalTokens
             snap.modelShares = Self.modelShares(from: todayRow)
+            if !snap.modelShares.isEmpty {
+                snap.modelShareDate = todayRow.date
+            }
+        }
+
+        if snap.modelShares.isEmpty {
+            let rowsByDateDescending = daily.daily.sorted { $0.date > $1.date }
+            if let latestModelRow = rowsByDateDescending.first(where: { !Self.modelShares(from: $0).isEmpty }) {
+                snap.modelShares = Self.modelShares(from: latestModelRow)
+                snap.modelShareDate = latestModelRow.date
+            }
         }
 
         // Current calendar week: total spend so far + fraction of the week elapsed.

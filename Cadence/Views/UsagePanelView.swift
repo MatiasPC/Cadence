@@ -136,7 +136,7 @@ struct UsagePanelView: View {
                 miniRow("ALL TIME", Format.money(store.snapshot.allTimeCost, compact: true))
 
                 if !store.snapshot.modelShares.isEmpty {
-                    Text("TODAY BY MODEL")
+                    Text(store.snapshot.modelShareHeading)
                         .dsTextStyle(.caption1, color: PanelColor.textSecondary)
                     ModelSplitBar(shares: store.snapshot.modelShares)
                 }

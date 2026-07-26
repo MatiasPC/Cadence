@@ -57,8 +57,16 @@ actor CCUsageClient {
     /// Fetches the active 5-hour block and the daily report concurrently.
     func fetch() async throws -> (blocks: BlocksReport, daily: DailyReport) {
         async let blocks: BlocksReport = run(["blocks", "--active", "--json"])
-        async let daily: DailyReport = run(["daily", "--json"])
+        async let daily = fetchDaily()
         return try await (blocks, daily)
+    }
+
+    private func fetchDaily() async throws -> DailyReport {
+        do {
+            return try await run(["daily", "--json", "--breakdown"])
+        } catch CCUsageError.failed(let message) where message.localizedCaseInsensitiveContains("breakdown") {
+            return try await run(["daily", "--json"])
+        }
     }
 
     // MARK: - Command resolution

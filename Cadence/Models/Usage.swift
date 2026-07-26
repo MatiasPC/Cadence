@@ -43,6 +43,20 @@ struct Projection: Decodable {
 struct DailyReport: Decodable {
     let daily: [DailyRow]
     let totals: Totals
+
+    private enum CodingKeys: String, CodingKey {
+        case daily, data, totals, summary
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        daily = try c.decodeIfPresent([DailyRow].self, forKey: .daily)
+            ?? c.decodeIfPresent([DailyRow].self, forKey: .data)
+            ?? []
+        totals = try c.decodeIfPresent(Totals.self, forKey: .totals)
+            ?? c.decodeIfPresent(Totals.self, forKey: .summary)
+            ?? Totals()
+    }
 }
 
 /// One calendar day of usage. ccusage v20 keys the date as `period`; older
@@ -52,19 +66,30 @@ struct DailyRow: Decodable {
     let date: String
     let totalCost: Double
     let totalTokens: Int
+    let modelsUsed: [String]
     let modelBreakdowns: [ModelBreakdown]
 
     private enum CodingKeys: String, CodingKey {
-        case period, date, totalCost, totalTokens, modelBreakdowns
+        case period, date, totalCost, costUSD, totalTokens
+        case modelsUsed, models, modelBreakdowns, breakdown
     }
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         date = try c.decodeIfPresent(String.self, forKey: .period)
             ?? c.decode(String.self, forKey: .date)
-        totalCost = try c.decode(Double.self, forKey: .totalCost)
-        totalTokens = try c.decode(Int.self, forKey: .totalTokens)
-        modelBreakdowns = try c.decodeIfPresent([ModelBreakdown].self, forKey: .modelBreakdowns) ?? []
+        totalCost = try c.decodeIfPresent(Double.self, forKey: .totalCost)
+            ?? c.decodeIfPresent(Double.self, forKey: .costUSD)
+            ?? 0
+        totalTokens = try c.decodeIfPresent(Int.self, forKey: .totalTokens) ?? 0
+        modelsUsed = try c.decodeIfPresent([String].self, forKey: .modelsUsed)
+            ?? c.decodeIfPresent([String].self, forKey: .models)
+            ?? []
+
+        let arrayBreakdowns = try c.decodeIfPresent([ModelBreakdown].self, forKey: .modelBreakdowns)
+        let keyedBreakdowns = try c.decodeIfPresent([String: ModelBreakdownValues].self, forKey: .breakdown)?
+            .map { ModelBreakdown(modelName: $0.key, values: $0.value) }
+        modelBreakdowns = arrayBreakdowns ?? keyedBreakdowns ?? []
     }
 }
 
@@ -77,6 +102,74 @@ struct ModelBreakdown: Decodable {
     let cacheReadTokens: Int
 
     var totalTokens: Int { inputTokens + outputTokens + cacheCreationTokens + cacheReadTokens }
+
+    private enum CodingKeys: String, CodingKey {
+        case modelName, cost, costUSD
+        case inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens
+    }
+
+    init(
+        modelName: String,
+        cost: Double,
+        inputTokens: Int,
+        outputTokens: Int,
+        cacheCreationTokens: Int,
+        cacheReadTokens: Int
+    ) {
+        self.modelName = modelName
+        self.cost = cost
+        self.inputTokens = inputTokens
+        self.outputTokens = outputTokens
+        self.cacheCreationTokens = cacheCreationTokens
+        self.cacheReadTokens = cacheReadTokens
+    }
+
+    init(modelName: String, values: ModelBreakdownValues) {
+        self.init(
+            modelName: modelName,
+            cost: values.cost,
+            inputTokens: values.inputTokens,
+            outputTokens: values.outputTokens,
+            cacheCreationTokens: values.cacheCreationTokens,
+            cacheReadTokens: values.cacheReadTokens
+        )
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        modelName = try c.decode(String.self, forKey: .modelName)
+        cost = try c.decodeIfPresent(Double.self, forKey: .cost)
+            ?? c.decodeIfPresent(Double.self, forKey: .costUSD)
+            ?? 0
+        inputTokens = try c.decodeIfPresent(Int.self, forKey: .inputTokens) ?? 0
+        outputTokens = try c.decodeIfPresent(Int.self, forKey: .outputTokens) ?? 0
+        cacheCreationTokens = try c.decodeIfPresent(Int.self, forKey: .cacheCreationTokens) ?? 0
+        cacheReadTokens = try c.decodeIfPresent(Int.self, forKey: .cacheReadTokens) ?? 0
+    }
+}
+
+struct ModelBreakdownValues: Decodable {
+    let cost: Double
+    let inputTokens: Int
+    let outputTokens: Int
+    let cacheCreationTokens: Int
+    let cacheReadTokens: Int
+
+    private enum CodingKeys: String, CodingKey {
+        case cost, costUSD
+        case inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        cost = try c.decodeIfPresent(Double.self, forKey: .cost)
+            ?? c.decodeIfPresent(Double.self, forKey: .costUSD)
+            ?? 0
+        inputTokens = try c.decodeIfPresent(Int.self, forKey: .inputTokens) ?? 0
+        outputTokens = try c.decodeIfPresent(Int.self, forKey: .outputTokens) ?? 0
+        cacheCreationTokens = try c.decodeIfPresent(Int.self, forKey: .cacheCreationTokens) ?? 0
+        cacheReadTokens = try c.decodeIfPresent(Int.self, forKey: .cacheReadTokens) ?? 0
+    }
 }
 
 struct Totals: Decodable {
@@ -86,6 +179,41 @@ struct Totals: Decodable {
     let cacheReadTokens: Int
     let totalCost: Double
     let totalTokens: Int
+
+    private enum CodingKeys: String, CodingKey {
+        case inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens
+        case totalCost, totalCostUSD, costUSD, totalTokens
+    }
+
+    init(
+        inputTokens: Int = 0,
+        outputTokens: Int = 0,
+        cacheCreationTokens: Int = 0,
+        cacheReadTokens: Int = 0,
+        totalCost: Double = 0,
+        totalTokens: Int = 0
+    ) {
+        self.inputTokens = inputTokens
+        self.outputTokens = outputTokens
+        self.cacheCreationTokens = cacheCreationTokens
+        self.cacheReadTokens = cacheReadTokens
+        self.totalCost = totalCost
+        self.totalTokens = totalTokens
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        inputTokens = try c.decodeIfPresent(Int.self, forKey: .inputTokens) ?? 0
+        outputTokens = try c.decodeIfPresent(Int.self, forKey: .outputTokens) ?? 0
+        cacheCreationTokens = try c.decodeIfPresent(Int.self, forKey: .cacheCreationTokens) ?? 0
+        cacheReadTokens = try c.decodeIfPresent(Int.self, forKey: .cacheReadTokens) ?? 0
+        totalCost = try c.decodeIfPresent(Double.self, forKey: .totalCost)
+            ?? c.decodeIfPresent(Double.self, forKey: .totalCostUSD)
+            ?? c.decodeIfPresent(Double.self, forKey: .costUSD)
+            ?? 0
+        totalTokens = try c.decodeIfPresent(Int.self, forKey: .totalTokens)
+            ?? inputTokens + outputTokens + cacheCreationTokens + cacheReadTokens
+    }
 }
 
 // MARK: - Real plan-limit usage (Claude Code's /api/oauth/usage)
@@ -141,7 +269,18 @@ struct UsageSnapshot: Equatable {
     /// 0...1 fraction of the current calendar week elapsed.
     var weekProgress: Double = 0
     var modelShares: [ModelShare] = []
+    var modelShareDate: String?
     var allTimeCost: Double = 0
+
+    var modelShareHeading: String {
+        guard let modelShareDate else { return "TODAY BY MODEL" }
+
+        let fmt = DateFormatter()
+        fmt.dateFormat = "yyyy-MM-dd"
+        return modelShareDate == fmt.string(from: Date())
+            ? "TODAY BY MODEL"
+            : "LATEST DAY BY MODEL"
+    }
 
     static func == (lhs: UsageSnapshot, rhs: UsageSnapshot) -> Bool {
         lhs.block == rhs.block
@@ -150,6 +289,7 @@ struct UsageSnapshot: Equatable {
             && lhs.weekCost == rhs.weekCost
             && lhs.weekProgress == rhs.weekProgress
             && lhs.allTimeCost == rhs.allTimeCost
+            && lhs.modelShareDate == rhs.modelShareDate
             && lhs.modelShares.map(\.id) == rhs.modelShares.map(\.id)
             && lhs.modelShares.map(\.cost) == rhs.modelShares.map(\.cost)
     }
