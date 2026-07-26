@@ -1,0 +1,79 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  release:
+    types: [published]
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    # Cadence targets macOS 26, which needs an Xcode 26 SDK. Use the newest
+    # macOS runner image available; the step below selects the highest Xcode
+    # installed on it. If GitHub's image doesn't yet ship Xcode 26, this job
+    # will fail on the SDK — that is an accurate signal, not a config bug.
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select newest Xcode
+        run: |
+          latest="$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1)"
+          echo "Using $latest"
+          sudo xcode-select -s "$latest"
+          xcodebuild -version
+          echo "Available macOS SDKs:"
+          xcodebuild -showsdks | grep -i macos || true
+
+      - name: Resolve Swift packages
+        run: |
+          xcodebuild -project Cadence.xcodeproj -scheme Cadence \
+            -resolvePackageDependencies
+
+      - name: Build (Release, ad-hoc signed)
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project Cadence.xcodeproj \
+            -scheme Cadence \
+            -configuration Release \
+            -destination 'platform=macOS' \
+            -derivedDataPath build \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            DEVELOPMENT_TEAM="" \
+            build | xcpretty || xcodebuild \
+              -project Cadence.xcodeproj -scheme Cadence \
+              -configuration Release -destination 'platform=macOS' \
+              -derivedDataPath build \
+              CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="-" \
+              CODE_SIGNING_REQUIRED=NO DEVELOPMENT_TEAM="" build
+
+      - name: Package app
+        run: |
+          APP="build/Build/Products/Release/Cadence.app"
+          ditto -c -k --sequesterRsrc --keepParent "$APP" Cadence.zip
+          echo "Packaged $(du -h Cadence.zip | cut -f1) Cadence.zip"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Cadence-macos
+          path: Cadence.zip
+          if-no-files-found: error
+
+      - name: Attach to release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" Cadence.zip --clobber

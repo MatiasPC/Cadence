@@ -1,0 +1,24 @@
+# macOS
+.DS_Store
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+*.xcuserdatad/
+DerivedData/
+build/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Note: Cadence.xcodeproj IS committed so the app can be opened and built
+# without installing XcodeGen. project.yml remains the source of truth —
+# regenerate with `xcodegen generate` after editing it (see CONTRIBUTING.md).
+# Package.resolved is committed on purpose to pin the DesignSystem revision.
+Cadence.xcodeproj/project.xcworkspace/xcuserdata/

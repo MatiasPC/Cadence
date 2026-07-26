@@ -1,0 +1,447 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0DA30D335C4F1CD7B452439F /* UsageMeter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F5EC9A468A9886611E0470C /* UsageMeter.swift */; };
+		13835933B28BB6176C7CA475 /* Usage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6D75A27609245A25738B547 /* Usage.swift */; };
+		43A6653D967FC59ABC91624E /* CadenceApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD2468FAE7A89F2B18DEDAF /* CadenceApp.swift */; };
+		59AE75EE8C4367CCAC4CD6D5 /* UsageLimitsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5648428434349193C90C02A /* UsageLimitsService.swift */; };
+		68267006B568B67E561FEECC /* MenuBarLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5498F6EEE0F256F65E58559F /* MenuBarLabel.swift */; };
+		7ABBC5C2A68F8EA5F8BB51B9 /* BurnRateRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FDDECC18B78E447FA894E71 /* BurnRateRow.swift */; };
+		7B9A701C478006CFFA10F672 /* PanelColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CC8009CA6779EC20FD5834E /* PanelColor.swift */; };
+		87ADC9257C07B7CEAD65B5A1 /* UsageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D84A5F2A9E21063AAF77BB8 /* UsageStore.swift */; };
+		928E7502E5F8F23B2FF35D1A /* GlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F87AD9C173549AE499669FB /* GlassCard.swift */; };
+		9BA7B2865E7245719BA090D6 /* StatBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30353CA4AB6EA2E877E150B5 /* StatBlock.swift */; };
+		A0AA3E15A34B9CC43EE9B293 /* PanelFooter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4A53336D9D052AF1325141 /* PanelFooter.swift */; };
+		A282993CC5DED1F7384854AF /* CCUsageClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AB7A4D3ABF61897D927126 /* CCUsageClient.swift */; };
+		AE7B3144C0C131D5A346B112 /* ModelSplitBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEFACD63F400C1EFAF8E9426 /* ModelSplitBar.swift */; };
+		CA7DEBC92273F86FC09DB926 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 3ED0B23EF9C3443957AA315F /* DesignSystem */; };
+		D6477690175FCD1DC963CEC5 /* Format.swift in Sources */ = {isa = PBXBuildFile; fileRef = E77A2C5207A083F93D57D49D /* Format.swift */; };
+		F10F9F9390B0F0C8421B2026 /* UsagePanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 689ACEEB7CE1BF784AD01C57 /* UsagePanelView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0CC8009CA6779EC20FD5834E /* PanelColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelColor.swift; sourceTree = "<group>"; };
+		0D84A5F2A9E21063AAF77BB8 /* UsageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageStore.swift; sourceTree = "<group>"; };
+		2747B5C0BD75EFECA1D2569B /* Cadence.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cadence.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2B02B767B601F9BBB8ABF4AB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		2F5EC9A468A9886611E0470C /* UsageMeter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageMeter.swift; sourceTree = "<group>"; };
+		30353CA4AB6EA2E877E150B5 /* StatBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatBlock.swift; sourceTree = "<group>"; };
+		31AB7A4D3ABF61897D927126 /* CCUsageClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CCUsageClient.swift; sourceTree = "<group>"; };
+		5498F6EEE0F256F65E58559F /* MenuBarLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarLabel.swift; sourceTree = "<group>"; };
+		5F87AD9C173549AE499669FB /* GlassCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassCard.swift; sourceTree = "<group>"; };
+		689ACEEB7CE1BF784AD01C57 /* UsagePanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsagePanelView.swift; sourceTree = "<group>"; };
+		8FDDECC18B78E447FA894E71 /* BurnRateRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BurnRateRow.swift; sourceTree = "<group>"; };
+		B5648428434349193C90C02A /* UsageLimitsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageLimitsService.swift; sourceTree = "<group>"; };
+		BEFACD63F400C1EFAF8E9426 /* ModelSplitBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelSplitBar.swift; sourceTree = "<group>"; };
+		CCD2468FAE7A89F2B18DEDAF /* CadenceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CadenceApp.swift; sourceTree = "<group>"; };
+		DE4A53336D9D052AF1325141 /* PanelFooter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelFooter.swift; sourceTree = "<group>"; };
+		E6D75A27609245A25738B547 /* Usage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Usage.swift; sourceTree = "<group>"; };
+		E77A2C5207A083F93D57D49D /* Format.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Format.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		56B76F527BA1B0C195D380DB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA7DEBC92273F86FC09DB926 /* DesignSystem in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		5875D9DE20878243E04EB85B /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				E6D75A27609245A25738B547 /* Usage.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		6A9F1C3B6267176F20AE4B03 = {
+			isa = PBXGroup;
+			children = (
+				FD48710B608BE6A57DA448D7 /* Cadence */,
+				ADFE63F9A7B11522B6C8E81A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		78D2D1E4520BA69AC30BB1CB /* App */ = {
+			isa = PBXGroup;
+			children = (
+				CCD2468FAE7A89F2B18DEDAF /* CadenceApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		ADFE63F9A7B11522B6C8E81A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2747B5C0BD75EFECA1D2569B /* Cadence.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		AE2F1C6C9DFB7E5BFCF6D60E /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				8FDDECC18B78E447FA894E71 /* BurnRateRow.swift */,
+				5F87AD9C173549AE499669FB /* GlassCard.swift */,
+				BEFACD63F400C1EFAF8E9426 /* ModelSplitBar.swift */,
+				DE4A53336D9D052AF1325141 /* PanelFooter.swift */,
+				30353CA4AB6EA2E877E150B5 /* StatBlock.swift */,
+				2F5EC9A468A9886611E0470C /* UsageMeter.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		B503AFF52A56DB4D78ECDCD4 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				2B02B767B601F9BBB8ABF4AB /* Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		BAC278234BCC8FE797941847 /* Design */ = {
+			isa = PBXGroup;
+			children = (
+				E77A2C5207A083F93D57D49D /* Format.swift */,
+				0CC8009CA6779EC20FD5834E /* PanelColor.swift */,
+			);
+			path = Design;
+			sourceTree = "<group>";
+		};
+		C37C0191DAE1A99930DB8D9A /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				5498F6EEE0F256F65E58559F /* MenuBarLabel.swift */,
+				689ACEEB7CE1BF784AD01C57 /* UsagePanelView.swift */,
+				AE2F1C6C9DFB7E5BFCF6D60E /* Components */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		C44473C867EA22AD5CDA9820 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				31AB7A4D3ABF61897D927126 /* CCUsageClient.swift */,
+				B5648428434349193C90C02A /* UsageLimitsService.swift */,
+				0D84A5F2A9E21063AAF77BB8 /* UsageStore.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		FD48710B608BE6A57DA448D7 /* Cadence */ = {
+			isa = PBXGroup;
+			children = (
+				78D2D1E4520BA69AC30BB1CB /* App */,
+				BAC278234BCC8FE797941847 /* Design */,
+				5875D9DE20878243E04EB85B /* Models */,
+				B503AFF52A56DB4D78ECDCD4 /* Resources */,
+				C44473C867EA22AD5CDA9820 /* Services */,
+				C37C0191DAE1A99930DB8D9A /* Views */,
+			);
+			path = Cadence;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1D9D0CF3C214130166213D80 /* Cadence */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 07126B28B5B904C139BBD128 /* Build configuration list for PBXNativeTarget "Cadence" */;
+			buildPhases = (
+				1F5350DE3B53E65CAAF89D1D /* Sources */,
+				56B76F527BA1B0C195D380DB /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Cadence;
+			packageProductDependencies = (
+				3ED0B23EF9C3443957AA315F /* DesignSystem */,
+			);
+			productName = Cadence;
+			productReference = 2747B5C0BD75EFECA1D2569B /* Cadence.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9FA114BF81E88A4D01B65D31 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					1D9D0CF3C214130166213D80 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 6735F591880E2DF1BC393107 /* Build configuration list for PBXProject "Cadence" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 6A9F1C3B6267176F20AE4B03;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				1B1DE355D46597D3F0574CF9 /* XCRemoteSwiftPackageReference "velvet-ui" */,
+			);
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1D9D0CF3C214130166213D80 /* Cadence */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1F5350DE3B53E65CAAF89D1D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7ABBC5C2A68F8EA5F8BB51B9 /* BurnRateRow.swift in Sources */,
+				A282993CC5DED1F7384854AF /* CCUsageClient.swift in Sources */,
+				43A6653D967FC59ABC91624E /* CadenceApp.swift in Sources */,
+				D6477690175FCD1DC963CEC5 /* Format.swift in Sources */,
+				928E7502E5F8F23B2FF35D1A /* GlassCard.swift in Sources */,
+				68267006B568B67E561FEECC /* MenuBarLabel.swift in Sources */,
+				AE7B3144C0C131D5A346B112 /* ModelSplitBar.swift in Sources */,
+				7B9A701C478006CFFA10F672 /* PanelColor.swift in Sources */,
+				A0AA3E15A34B9CC43EE9B293 /* PanelFooter.swift in Sources */,
+				9BA7B2865E7245719BA090D6 /* StatBlock.swift in Sources */,
+				13835933B28BB6176C7CA475 /* Usage.swift in Sources */,
+				59AE75EE8C4367CCAC4CD6D5 /* UsageLimitsService.swift in Sources */,
+				0DA30D335C4F1CD7B452439F /* UsageMeter.swift in Sources */,
+				F10F9F9390B0F0C8421B2026 /* UsagePanelView.swift in Sources */,
+				87ADC9257C07B7CEAD65B5A1 /* UsageStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		0AC6D37A18265C6868E862C8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = Cadence/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		66FA57B5F57FFDBD1C1E8963 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = Cadence/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		9DBE9E0079A7DB194A03BF0C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOLS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Cadence/Resources/Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 2.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cadence.app;
+				PRODUCT_NAME = Cadence;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		C78721ED836CA881972A504D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOLS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Cadence/Resources/Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 2.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cadence.app;
+				PRODUCT_NAME = Cadence;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		07126B28B5B904C139BBD128 /* Build configuration list for PBXNativeTarget "Cadence" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0AC6D37A18265C6868E862C8 /* Debug */,
+				66FA57B5F57FFDBD1C1E8963 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6735F591880E2DF1BC393107 /* Build configuration list for PBXProject "Cadence" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C78721ED836CA881972A504D /* Debug */,
+				9DBE9E0079A7DB194A03BF0C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1B1DE355D46597D3F0574CF9 /* XCRemoteSwiftPackageReference "velvet-ui" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/MatiasPC/velvet-ui.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3ED0B23EF9C3443957AA315F /* DesignSystem */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1B1DE355D46597D3F0574CF9 /* XCRemoteSwiftPackageReference "velvet-ui" */;
+			productName = DesignSystem;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 9FA114BF81E88A4D01B65D31 /* Project object */;
+}

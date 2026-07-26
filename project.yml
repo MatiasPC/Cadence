@@ -1,0 +1,38 @@
+name: Cadence
+options:
+  bundleIdPrefix: com.cadence
+  deploymentTarget:
+    macOS: "26.0"
+  createIntermediateGroups: true
+
+packages:
+  DesignSystem:
+    url: https://github.com/MatiasPC/velvet-ui.git
+    branch: main
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MACOSX_DEPLOYMENT_TARGET: "26.0"
+    MARKETING_VERSION: "2.0"
+    CURRENT_PROJECT_VERSION: "1"
+    PRODUCT_BUNDLE_IDENTIFIER: com.cadence.app
+    GENERATE_INFOPLIST_FILE: "NO"
+    INFOPLIST_FILE: Cadence/Resources/Info.plist
+    ENABLE_HARDENED_RUNTIME: "NO"
+    ENABLE_APP_SANDBOX: "NO"
+    CODE_SIGN_STYLE: Automatic
+    PRODUCT_NAME: Cadence
+    ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOLS: "NO"
+
+targets:
+  Cadence:
+    type: application
+    platform: macOS
+    sources:
+      - path: Cadence
+    dependencies:
+      - package: DesignSystem
+    settings:
+      base:
+        INFOPLIST_FILE: Cadence/Resources/Info.plist

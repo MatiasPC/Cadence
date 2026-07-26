@@ -1,0 +1,15 @@
+{
+  "originHash" : "5c7c6ddd1294eda96ef728bfdca023dcded26d5701b3feeb971097770c50aa0d",
+  "pins" : [
+    {
+      "identity" : "velvet-ui",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/MatiasPC/velvet-ui.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "a631c143b1cc56c2d52216ac70a4110cd4331bb6"
+      }
+    }
+  ],
+  "version" : 3
+}
