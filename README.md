@@ -47,21 +47,36 @@ It refreshes automatically every 60 seconds.
 
 ## Quick start
 
-### Option A — Download the app (no Xcode needed) 👈 easiest
+First, install the `ccusage` CLI that Cadence reads your usage from (all options need this):
 
-1. **First, install `ccusage`** (Cadence reads your usage through it): `npm install -g ccusage`
-2. Download **`Cadence.zip`** from the [**latest release**](https://github.com/MatiasPC/Cadence/releases/latest) and unzip it.
-3. Move **Cadence.app** to your `/Applications` folder.
-4. **One-time unlock** — the app isn't notarized by Apple, so macOS blocks it until you clear the "downloaded from the internet" flag. In **Terminal**, run:
+```bash
+npm install -g ccusage
+```
+
+### Option A — Homebrew 👈 easiest
+
+```bash
+brew tap matiaspc/tap
+brew trust --cask matiaspc/tap/cadence   # one-time; Homebrew 6+ requires this for third-party taps
+brew install --cask matiaspc/tap/cadence
+```
+
+Then launch **Cadence** — it lives in your **menu bar** (no Dock icon). The cask automatically clears the macOS quarantine flag, so it opens without a Gatekeeper block. Upgrade later with `brew upgrade --cask matiaspc/tap/cadence`.
+
+### Option B — Download the app (no Homebrew)
+
+1. Download **`Cadence.zip`** from the [**latest release**](https://github.com/MatiasPC/Cadence/releases/latest) and unzip it.
+2. Move **Cadence.app** to your `/Applications` folder.
+3. **One-time unlock** — the app isn't notarized by Apple, so macOS blocks it until you clear the "downloaded from the internet" flag. In **Terminal**, run:
    ```bash
    xattr -dr com.apple.quarantine /Applications/Cadence.app
    ```
-5. Double-click **Cadence**. It lives in your **menu bar** (no Dock icon).
+4. Double-click **Cadence**. It lives in your **menu bar** (no Dock icon).
 
 > [!NOTE]
-> Step 4 is needed because notarization requires a paid Apple Developer account this build doesn't use. It's not sandboxed on purpose — it launches `ccusage` and reads your Keychain. Building from source (Option B) skips this step entirely.
+> The unlock step exists because notarization requires a paid Apple Developer account this build doesn't use. Cadence is un-sandboxed on purpose — it launches `ccusage` and reads your Keychain. Homebrew (Option A) and building from source (Option C) both avoid the manual step.
 
-### Option B — Build from source
+### Option C — Build from source
 
 ```bash
 git clone https://github.com/MatiasPC/Cadence.git

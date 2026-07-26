@@ -13,6 +13,10 @@ concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
+# The release job uploads the built .app to the release; that needs write.
+permissions:
+  contents: write
+
 jobs:
   build:
     # Cadence targets macOS 26, which needs an Xcode 26 SDK. Use the newest
