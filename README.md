@@ -47,33 +47,30 @@ It refreshes automatically every 60 seconds.
 
 ## Quick start
 
-### Option A — Build from source (recommended)
+### Option A — Download the app (no Xcode needed) 👈 easiest
+
+1. **First, install `ccusage`** (Cadence reads your usage through it): `npm install -g ccusage`
+2. Download **`Cadence.zip`** from the [**latest release**](https://github.com/MatiasPC/Cadence/releases/latest) and unzip it.
+3. Move **Cadence.app** to your `/Applications` folder.
+4. **One-time unlock** — the app isn't notarized by Apple, so macOS blocks it until you clear the "downloaded from the internet" flag. In **Terminal**, run:
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/Cadence.app
+   ```
+5. Double-click **Cadence**. It lives in your **menu bar** (no Dock icon).
+
+> [!NOTE]
+> Step 4 is needed because notarization requires a paid Apple Developer account this build doesn't use. It's not sandboxed on purpose — it launches `ccusage` and reads your Keychain. Building from source (Option B) skips this step entirely.
+
+### Option B — Build from source
 
 ```bash
-# 1. Clone
 git clone https://github.com/MatiasPC/Cadence.git
 cd Cadence
-
-# 2. Open in Xcode (the .xcodeproj is committed — no extra tooling needed)
-open Cadence.xcodeproj
-
-# 3. Select the "Cadence" scheme and press ⌘R.
+open Cadence.xcodeproj      # the .xcodeproj is committed — no extra tooling needed
+# Select the "Cadence" scheme and press ⌘R.
 ```
 
-The `DesignSystem` UI package is resolved automatically from GitHub on first build — nothing to install.
-
-Prefer the command line?
-
-```bash
-xcodebuild -project Cadence.xcodeproj -scheme Cadence -configuration Release build
-```
-
-### Option B — Download a build
-
-Grab the latest `.app` from the [**Releases**](https://github.com/MatiasPC/Cadence/releases) page (built by CI).
-
-> [!IMPORTANT]
-> Because Cadence needs to launch subprocesses and read your Keychain, it is **not** sandboxed and is **not** notarized. macOS Gatekeeper will warn on first launch. To open it: **right-click the app → Open → Open**, or run `xattr -dr com.apple.quarantine /path/to/Cadence.app`. Building from source (Option A) avoids this entirely.
+The `DesignSystem` UI package resolves automatically from GitHub on first build — nothing to install. Prefer the command line? `xcodebuild -project Cadence.xcodeproj -scheme Cadence -configuration Release build`
 
 ### First run
 

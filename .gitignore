@@ -22,3 +22,6 @@ build/
 # regenerate with `xcodegen generate` after editing it (see CONTRIBUTING.md).
 # Package.resolved is committed on purpose to pin the DesignSystem revision.
 Cadence.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Release build artifacts (never commit binaries)
+Cadence.zip
