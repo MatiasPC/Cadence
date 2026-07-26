@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0DA30D335C4F1CD7B452439F /* UsageMeter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F5EC9A468A9886611E0470C /* UsageMeter.swift */; };
 		13835933B28BB6176C7CA475 /* Usage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6D75A27609245A25738B547 /* Usage.swift */; };
+		1ACBC23C35215673E9B90181 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E1673FCE66C0625688CFF179 /* Assets.xcassets */; };
 		43A6653D967FC59ABC91624E /* CadenceApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD2468FAE7A89F2B18DEDAF /* CadenceApp.swift */; };
 		59AE75EE8C4367CCAC4CD6D5 /* UsageLimitsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5648428434349193C90C02A /* UsageLimitsService.swift */; };
 		68267006B568B67E561FEECC /* MenuBarLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5498F6EEE0F256F65E58559F /* MenuBarLabel.swift */; };
@@ -41,6 +42,7 @@
 		BEFACD63F400C1EFAF8E9426 /* ModelSplitBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelSplitBar.swift; sourceTree = "<group>"; };
 		CCD2468FAE7A89F2B18DEDAF /* CadenceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CadenceApp.swift; sourceTree = "<group>"; };
 		DE4A53336D9D052AF1325141 /* PanelFooter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelFooter.swift; sourceTree = "<group>"; };
+		E1673FCE66C0625688CFF179 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E6D75A27609245A25738B547 /* Usage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Usage.swift; sourceTree = "<group>"; };
 		E77A2C5207A083F93D57D49D /* Format.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Format.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -105,6 +107,7 @@
 		B503AFF52A56DB4D78ECDCD4 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				E1673FCE66C0625688CFF179 /* Assets.xcassets */,
 				2B02B767B601F9BBB8ABF4AB /* Info.plist */,
 			);
 			path = Resources;
@@ -161,6 +164,7 @@
 			buildPhases = (
 				1F5350DE3B53E65CAAF89D1D /* Sources */,
 				56B76F527BA1B0C195D380DB /* Frameworks */,
+				E1CA9D8D6D3EEF50A03E4E03 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -209,6 +213,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E1CA9D8D6D3EEF50A03E4E03 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1ACBC23C35215673E9B90181 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		1F5350DE3B53E65CAAF89D1D /* Sources */ = {
