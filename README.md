@@ -32,7 +32,8 @@ It refreshes automatically every 60 seconds.
 
 <div align="center">
 <br>
-<em>📸 Screenshot coming soon — drop a PNG here and reference it.</em>
+<em> <img width="300" height="320" alt="image" src="https://github.com/user-attachments/assets/df0b99a7-1f09-43f6-97b9-c997516398dc" />
+</em>
 <br><br>
 </div>
 
