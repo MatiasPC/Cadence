@@ -15,8 +15,14 @@ on:
     types: [published]
 
 concurrency:
-  group: build-${{ github.ref }}
-  cancel-in-progress: true
+  # Keyed by event as well as ref. Sharing one group per ref meant a manual run
+  # and a push to main cancelled each other, which shows up as a red "cancelled"
+  # for work that was never actually broken.
+  group: build-${{ github.event_name }}-${{ github.ref }}
+  # Superseding a push is fine — the newer commit is what matters. Never cancel
+  # a release: it notarizes and attaches the download, so killing it midway
+  # would publish a release with a missing or unstapled asset.
+  cancel-in-progress: ${{ github.event_name != 'release' }}
 
 # The release job uploads the built .app to the release; that needs write.
 permissions:
