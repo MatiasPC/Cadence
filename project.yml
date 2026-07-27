@@ -14,12 +14,12 @@ settings:
   base:
     SWIFT_VERSION: "6.0"
     MACOSX_DEPLOYMENT_TARGET: "26.0"
-    MARKETING_VERSION: "2.1"
+    MARKETING_VERSION: "2.2"
     CURRENT_PROJECT_VERSION: "1"
     PRODUCT_BUNDLE_IDENTIFIER: com.cadence.app
     GENERATE_INFOPLIST_FILE: "NO"
     INFOPLIST_FILE: Cadence/Resources/Info.plist
-    ENABLE_HARDENED_RUNTIME: "NO"
+    ENABLE_HARDENED_RUNTIME: "YES"
     ENABLE_APP_SANDBOX: "NO"
     # Signing is deliberately NOT set here — build settings in this block would
     # override the xcconfig below. See Cadence/Config/Signing.xcconfig for why a

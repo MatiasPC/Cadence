@@ -38,36 +38,144 @@ jobs:
           echo "Available macOS SDKs:"
           xcodebuild -showsdks | grep -i macos || true
 
+      # Signing secrets are unavailable to forked PRs, and that must not break
+      # their builds. Everything below degrades to the ad-hoc path when the
+      # certificate secret is absent; only release builds are expected to sign.
+      - name: Determine signing mode
+        id: signing
+        env:
+          CERT: ${{ secrets.MACOS_CERTIFICATE }}
+        run: |
+          if [ -n "$CERT" ]; then
+            echo "mode=developer-id" >> "$GITHUB_OUTPUT"
+            echo "Signing with Developer ID."
+          else
+            echo "mode=adhoc" >> "$GITHUB_OUTPUT"
+            echo "No certificate secret present — building ad-hoc."
+          fi
+
+      - name: Import signing certificate
+        if: steps.signing.outputs.mode == 'developer-id'
+        env:
+          CERT: ${{ secrets.MACOS_CERTIFICATE }}
+          CERT_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          # A throwaway keychain keeps the cert off the runner's login keychain
+          # and lets the cleanup step delete it wholesale.
+          KEYCHAIN="$RUNNER_TEMP/signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(uuidgen)"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+
+          echo "$CERT" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" \
+            -k "$KEYCHAIN" -P "$CERT_PASSWORD" \
+            -T /usr/bin/codesign -f pkcs12
+          rm -f "$RUNNER_TEMP/cert.p12"
+
+          # Let codesign use the key without an interactive prompt.
+          security set-key-partition-list \
+            -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" >/dev/null
+          security list-keychain -d user -s "$KEYCHAIN" login.keychain-db
+
+          IDENTITY="$(security find-identity -v -p codesigning "$KEYCHAIN" \
+            | grep 'Developer ID Application' | head -1 | awk '{print $2}')"
+          if [ -z "$IDENTITY" ]; then
+            echo "::error::No 'Developer ID Application' identity in the imported certificate."
+            echo "Found instead:"
+            security find-identity -v -p codesigning "$KEYCHAIN"
+            exit 1
+          fi
+          echo "SIGN_IDENTITY=$IDENTITY" >> "$GITHUB_ENV"
+          echo "SIGN_KEYCHAIN=$KEYCHAIN" >> "$GITHUB_ENV"
+          echo "Imported Developer ID identity."
+
       - name: Resolve Swift packages
         run: |
           xcodebuild -project Cadence.xcodeproj -scheme Cadence \
             -resolvePackageDependencies
 
-      - name: Build (Release, ad-hoc signed)
+      - name: Build (Release)
+        env:
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
-          set -o pipefail
-          xcodebuild \
-            -project Cadence.xcodeproj \
-            -scheme Cadence \
-            -configuration Release \
-            -destination 'platform=macOS' \
-            -derivedDataPath build \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="-" \
-            CODE_SIGNING_REQUIRED=NO \
-            DEVELOPMENT_TEAM="" \
-            build | xcpretty || xcodebuild \
-              -project Cadence.xcodeproj -scheme Cadence \
-              -configuration Release -destination 'platform=macOS' \
+          set -euo pipefail
+          if [ "${{ steps.signing.outputs.mode }}" = "developer-id" ]; then
+            # Hardened Runtime is on in project.yml; notarization requires it.
+            xcodebuild \
+              -project Cadence.xcodeproj \
+              -scheme Cadence \
+              -configuration Release \
+              -destination 'platform=macOS' \
               -derivedDataPath build \
-              CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="-" \
-              CODE_SIGNING_REQUIRED=NO DEVELOPMENT_TEAM="" build
+              CODE_SIGN_STYLE=Manual \
+              CODE_SIGN_IDENTITY="$SIGN_IDENTITY" \
+              CODE_SIGNING_REQUIRED=YES \
+              OTHER_CODE_SIGN_FLAGS="--keychain $SIGN_KEYCHAIN --timestamp" \
+              DEVELOPMENT_TEAM="$TEAM_ID" \
+              build
+          else
+            xcodebuild \
+              -project Cadence.xcodeproj \
+              -scheme Cadence \
+              -configuration Release \
+              -destination 'platform=macOS' \
+              -derivedDataPath build \
+              CODE_SIGN_STYLE=Manual \
+              CODE_SIGN_IDENTITY="-" \
+              CODE_SIGNING_REQUIRED=NO \
+              DEVELOPMENT_TEAM="" \
+              build
+          fi
+
+      - name: Notarize and staple
+        if: steps.signing.outputs.mode == 'developer-id'
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          APP="build/Build/Products/Release/Cadence.app"
+
+          # Fail loudly if the runtime flag is missing — Apple would reject it
+          # anyway, and the error there is far less legible than this one.
+          if ! codesign -d --verbose=2 "$APP" 2>&1 | grep -q 'flags=.*runtime'; then
+            echo "::error::Hardened Runtime flag absent; notarization would be rejected."
+            exit 1
+          fi
+
+          # notarytool takes an archive, but the ticket staples to the .app.
+          ditto -c -k --sequesterRsrc --keepParent "$APP" notarize.zip
+          xcrun notarytool submit notarize.zip \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_APP_PASSWORD" \
+            --team-id "$TEAM_ID" \
+            --wait --timeout 30m
+          rm -f notarize.zip
+
+          xcrun stapler staple "$APP"
+          xcrun stapler validate "$APP"
+
+          # What a user's machine will actually check on first launch.
+          spctl --assess --type execute --verbose=4 "$APP"
+          echo "Notarized and stapled."
 
       - name: Package app
         run: |
+          set -euo pipefail
           APP="build/Build/Products/Release/Cadence.app"
           ditto -c -k --sequesterRsrc --keepParent "$APP" Cadence.zip
           echo "Packaged $(du -h Cadence.zip | cut -f1) Cadence.zip"
+
+      - name: Clean up keychain
+        # Runs even on failure so the certificate never outlives the job.
+        if: always() && steps.signing.outputs.mode == 'developer-id'
+        run: |
+          security delete-keychain "$RUNNER_TEMP/signing.keychain-db" 2>/dev/null || true
+          rm -f "$RUNNER_TEMP/cert.p12" 2>/dev/null || true
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4

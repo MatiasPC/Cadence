@@ -1,6 +1,8 @@
 // Code signing.
 //
-// Default is ad-hoc, which needs no certificate and is what CI ships.
+// Default is ad-hoc, which needs no certificate. That's what local builds and
+// fork PRs use. Release builds override this in CI to sign with a Developer ID
+// certificate and notarize — see .github/workflows/build.yml.
 //
 // Ad-hoc has one important cost for local development: the signature's
 // designated requirement is a bare cdhash, so every rebuild produces a

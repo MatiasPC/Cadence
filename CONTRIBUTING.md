@@ -44,6 +44,36 @@ CODE_SIGNING_REQUIRED = YES
 Use the certificate's SHA-1 hash, not the name `Apple Development` — for macOS
 targets Xcode resolves that name to `Mac Development` and fails to match.
 
+## Releasing (maintainers)
+
+Release builds are signed with a **Developer ID Application** certificate and
+notarized by Apple. CI does this automatically, but only when the signing
+secrets exist — **without them the workflow silently falls back to an ad-hoc
+build**, which still succeeds and still uploads. That fallback is deliberate so
+fork PRs keep building, but it means a missing secret produces an
+un-notarized release rather than a failed job. Check the workflow log for
+`Signing with Developer ID` before publishing.
+
+Required repository secrets (Settings → Secrets and variables → Actions):
+
+| Secret | What it is |
+|---|---|
+| `MACOS_CERTIFICATE` | Developer ID Application `.p12`, base64-encoded: `base64 -i cert.p12 \| pbcopy` |
+| `MACOS_CERTIFICATE_PASSWORD` | The password you set when exporting the `.p12` |
+| `APPLE_TEAM_ID` | 10-character team ID from developer.apple.com → Membership |
+| `APPLE_ID` | The Apple ID email of the developer account |
+| `APPLE_APP_PASSWORD` | An **app-specific password** from appleid.apple.com → Sign-In and Security (not your Apple ID password) |
+
+Note that a `Developer ID Application` certificate is a different thing from the
+`Apple Development` certificate used for local builds; a paid Apple Developer
+Program membership is required to create one. In Xcode: Settings → Accounts →
+Manage Certificates → **+** → Developer ID Application, then export it from
+Keychain Access as a `.p12`.
+
+To cut a release: bump `MARKETING_VERSION` in `project.yml`, run `xcodegen
+generate`, commit, then publish a GitHub Release. The workflow builds, signs,
+notarizes, staples, and attaches `Cadence.zip`.
+
 ## Architecture
 
 A clean, small SwiftUI menu-bar app:

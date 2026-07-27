@@ -28,7 +28,7 @@ Cadence lives in your menu bar and shows — at a glance — how much of your Cl
 - **Today & this week** — spend and token totals, plus an Opus / Sonnet / Haiku model split.
 - **All-time cost** — your cumulative Claude Code spend.
 
-It refreshes automatically every 60 seconds.
+It refreshes automatically every 60 seconds, and restores your last numbers instantly on launch instead of showing an empty panel.
 
 <div align="center">
 <br>
@@ -62,20 +62,25 @@ brew trust --cask matiaspc/tap/cadence   # one-time; Homebrew 6+ requires this f
 brew install --cask matiaspc/tap/cadence
 ```
 
-Then launch **Cadence** — it lives in your **menu bar** (no Dock icon). The cask automatically clears the macOS quarantine flag, so it opens without a Gatekeeper block. Upgrade later with `brew upgrade --cask matiaspc/tap/cadence`.
+Then launch **Cadence** — it lives in your **menu bar** (no Dock icon). Upgrade later with `brew upgrade --cask matiaspc/tap/cadence`.
 
 ### Option B — Download the app (no Homebrew)
 
 1. Download **`Cadence.zip`** from the [**latest release**](https://github.com/MatiasPC/Cadence/releases/latest) and unzip it.
 2. Move **Cadence.app** to your `/Applications` folder.
-3. **One-time unlock** — the app isn't notarized by Apple, so macOS blocks it until you clear the "downloaded from the internet" flag. In **Terminal**, run:
-   ```bash
-   xattr -dr com.apple.quarantine /Applications/Cadence.app
-   ```
-4. Double-click **Cadence**. It lives in your **menu bar** (no Dock icon).
+3. Double-click **Cadence**. It lives in your **menu bar** (no Dock icon).
+
+That's it. Releases are **signed with a Developer ID certificate and notarized by Apple**, so macOS opens them normally — no `xattr` command, no right-click-Open workaround, no security warning to click past.
 
 > [!NOTE]
-> The unlock step exists because notarization requires a paid Apple Developer account this build doesn't use. Cadence is un-sandboxed on purpose — it launches `ccusage` and reads your Keychain. Homebrew (Option A) and building from source (Option C) both avoid the manual step.
+> Releases before **v2.2** were ad-hoc signed and needed a manual `xattr -dr com.apple.quarantine` step to launch. If you're on one of those, upgrading removes the need for it.
+
+Verify the signature yourself before trusting it:
+
+```bash
+xcrun stapler validate /Applications/Cadence.app       # notarization ticket
+spctl --assess --type execute -vv /Applications/Cadence.app   # Gatekeeper verdict
+```
 
 ### Option C — Build from source
 
@@ -90,7 +95,9 @@ The `DesignSystem` UI package resolves automatically from GitHub on first build 
 
 ### First run
 
-On first launch Cadence asks macOS for permission to read the `Claude Code-credentials` Keychain item (that's what powers the *real* limit bars — see [Privacy & Security](#privacy--security)). Choose **Always Allow** for silent refreshes. If you decline, everything still works — Cadence just shows time-based estimate bars instead.
+Cadence starts showing time-based estimate bars and **never interrupts you with a permission dialog on its own**.
+
+To get the *real* plan-limit percentages it needs to read Claude Code's `Claude Code-credentials` Keychain item. When it can't, the panel shows a small **Allow access** button — press it and macOS will ask; choose **Always Allow** and every later refresh is silent. That prompt only ever appears because you clicked, never from a background refresh. Ignore it and everything still works, just with estimates instead of exact percentages. Details in [Privacy & Security](#privacy--security).
 
 ## How it works
 
@@ -105,16 +112,21 @@ On first launch Cadence asks macOS for permission to read the `Claude Code-crede
   api.anthropic.com/api/oauth/usage   ← real plan-limit %, same as /usage
 ```
 
-- Usage numbers come from the local **`ccusage`** CLI (two commands run concurrently, off the main thread).
+- Usage numbers come from the local **`ccusage`** CLI, off the main thread. The active block is polled every 60s; the heavier daily report every 5 minutes.
 - The optional **real plan-limit bars** come from one HTTPS call to Anthropic's own usage endpoint, authenticated with the OAuth token Claude Code already stored in your Keychain. **That token stays on your machine and is only ever sent to Anthropic.** Full details in [SECURITY.md](SECURITY.md).
+
+> [!NOTE]
+> That usage endpoint is Claude Code's own internal API, not a documented public one. It can change without warning. If it ever does, Cadence falls back to time-based estimate bars rather than breaking — so a sudden switch to estimates usually means the endpoint moved, not that your install is broken.
 
 ## Privacy & Security
 
 Cadence is designed to be boringly trustworthy, and the code is short enough to read in one sitting:
 
 - **One** network connection, to `api.anthropic.com` only. No telemetry, no analytics, no third-party servers.
-- Your Keychain token is read at runtime, held in memory, sent only to Anthropic, and **never logged or written to disk**.
-- The only thing persisted locally is a single UI preference.
+- Your Keychain token is read at runtime, held in memory, sent only to Anthropic, and **never logged or written to disk**. There is no logging anywhere in the app, so it can't leak into Console either.
+- **Keychain reads are silent** — the system permission panel appears only when you click **Allow access**, never during a background refresh.
+- Two things are persisted, neither sensitive: your menu-bar preference, and a cache of the usage numbers already on screen (so launches aren't empty). **No credentials, ever.**
+- Signed with a Developer ID, built with the **Hardened Runtime**, and **notarized by Apple** as of v2.2.
 
 Read the full, honest breakdown — including how to verify every claim yourself — in **[SECURITY.md](SECURITY.md)**.
 
