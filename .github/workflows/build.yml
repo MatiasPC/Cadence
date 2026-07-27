@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      sync_tag:
+        description: "Re-sync the Homebrew cask to this release tag (e.g. v2.3). Leave empty for a plain build."
+        required: false
+        default: ""
   release:
     types: [published]
 
@@ -233,14 +238,19 @@ jobs:
   update-tap:
     name: Update Homebrew cask
     needs: build
-    if: github.event_name == 'release' && github.event.release.prerelease == false
+    # Also runnable by hand with a sync_tag, so the cask can be re-pointed at an
+    # existing release without cutting a new one — useful if a release fails
+    # partway, and the only way to exercise this path without publishing.
+    if: >-
+      (github.event_name == 'release' && github.event.release.prerelease == false) ||
+      (github.event_name == 'workflow_dispatch' && inputs.sync_tag != '')
     runs-on: ubuntu-latest
     steps:
       - name: Bump cask to the released version
         env:
           GH_TOKEN: ${{ github.token }}
           TAP_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
-          TAG: ${{ github.event.release.tag_name }}
+          TAG: ${{ github.event.release.tag_name || inputs.sync_tag }}
         run: |
           set -euo pipefail
 
