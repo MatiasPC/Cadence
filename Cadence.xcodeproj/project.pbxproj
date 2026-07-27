@@ -9,10 +9,12 @@
 /* Begin PBXBuildFile section */
 		0DA30D335C4F1CD7B452439F /* UsageMeter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F5EC9A468A9886611E0470C /* UsageMeter.swift */; };
 		13835933B28BB6176C7CA475 /* Usage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6D75A27609245A25738B547 /* Usage.swift */; };
-		1ACBC23C35215673E9B90181 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E1673FCE66C0625688CFF179 /* Assets.xcassets */; };
+		2F4FBDE851D54B016CEF3F69 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A749C288E5597F383050F5CC /* Assets.xcassets */; };
 		43A6653D967FC59ABC91624E /* CadenceApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD2468FAE7A89F2B18DEDAF /* CadenceApp.swift */; };
+		4D8AC3FEE435984AE0039C8E /* UsageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC9665EB283167E71D61473 /* UsageCache.swift */; };
 		59AE75EE8C4367CCAC4CD6D5 /* UsageLimitsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5648428434349193C90C02A /* UsageLimitsService.swift */; };
 		68267006B568B67E561FEECC /* MenuBarLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5498F6EEE0F256F65E58559F /* MenuBarLabel.swift */; };
+		7175570421CC110614F336B9 /* ClaudeCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54E7C7E0885F01BD38370D08 /* ClaudeCredentials.swift */; };
 		7ABBC5C2A68F8EA5F8BB51B9 /* BurnRateRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FDDECC18B78E447FA894E71 /* BurnRateRow.swift */; };
 		7B9A701C478006CFFA10F672 /* PanelColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CC8009CA6779EC20FD5834E /* PanelColor.swift */; };
 		87ADC9257C07B7CEAD65B5A1 /* UsageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D84A5F2A9E21063AAF77BB8 /* UsageStore.swift */; };
@@ -35,14 +37,17 @@
 		30353CA4AB6EA2E877E150B5 /* StatBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatBlock.swift; sourceTree = "<group>"; };
 		31AB7A4D3ABF61897D927126 /* CCUsageClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CCUsageClient.swift; sourceTree = "<group>"; };
 		5498F6EEE0F256F65E58559F /* MenuBarLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarLabel.swift; sourceTree = "<group>"; };
+		54E7C7E0885F01BD38370D08 /* ClaudeCredentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeCredentials.swift; sourceTree = "<group>"; };
 		5F87AD9C173549AE499669FB /* GlassCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassCard.swift; sourceTree = "<group>"; };
 		689ACEEB7CE1BF784AD01C57 /* UsagePanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsagePanelView.swift; sourceTree = "<group>"; };
 		8FDDECC18B78E447FA894E71 /* BurnRateRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BurnRateRow.swift; sourceTree = "<group>"; };
+		A749C288E5597F383050F5CC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B5648428434349193C90C02A /* UsageLimitsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageLimitsService.swift; sourceTree = "<group>"; };
 		BEFACD63F400C1EFAF8E9426 /* ModelSplitBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelSplitBar.swift; sourceTree = "<group>"; };
+		C178CF1055FB491A0D4328ED /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
 		CCD2468FAE7A89F2B18DEDAF /* CadenceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CadenceApp.swift; sourceTree = "<group>"; };
 		DE4A53336D9D052AF1325141 /* PanelFooter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelFooter.swift; sourceTree = "<group>"; };
-		E1673FCE66C0625688CFF179 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DEC9665EB283167E71D61473 /* UsageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageCache.swift; sourceTree = "<group>"; };
 		E6D75A27609245A25738B547 /* Usage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Usage.swift; sourceTree = "<group>"; };
 		E77A2C5207A083F93D57D49D /* Format.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Format.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -65,6 +70,14 @@
 				E6D75A27609245A25738B547 /* Usage.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		625376705FDA3DAB1AEA6E00 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				C178CF1055FB491A0D4328ED /* Signing.xcconfig */,
+			);
+			path = Config;
 			sourceTree = "<group>";
 		};
 		6A9F1C3B6267176F20AE4B03 = {
@@ -107,7 +120,7 @@
 		B503AFF52A56DB4D78ECDCD4 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				E1673FCE66C0625688CFF179 /* Assets.xcassets */,
+				A749C288E5597F383050F5CC /* Assets.xcassets */,
 				2B02B767B601F9BBB8ABF4AB /* Info.plist */,
 			);
 			path = Resources;
@@ -136,6 +149,8 @@
 			isa = PBXGroup;
 			children = (
 				31AB7A4D3ABF61897D927126 /* CCUsageClient.swift */,
+				54E7C7E0885F01BD38370D08 /* ClaudeCredentials.swift */,
+				DEC9665EB283167E71D61473 /* UsageCache.swift */,
 				B5648428434349193C90C02A /* UsageLimitsService.swift */,
 				0D84A5F2A9E21063AAF77BB8 /* UsageStore.swift */,
 			);
@@ -146,6 +161,7 @@
 			isa = PBXGroup;
 			children = (
 				78D2D1E4520BA69AC30BB1CB /* App */,
+				625376705FDA3DAB1AEA6E00 /* Config */,
 				BAC278234BCC8FE797941847 /* Design */,
 				5875D9DE20878243E04EB85B /* Models */,
 				B503AFF52A56DB4D78ECDCD4 /* Resources */,
@@ -163,8 +179,8 @@
 			buildConfigurationList = 07126B28B5B904C139BBD128 /* Build configuration list for PBXNativeTarget "Cadence" */;
 			buildPhases = (
 				1F5350DE3B53E65CAAF89D1D /* Sources */,
+				BFA5A0EE784FE6F59E5E0293 /* Resources */,
 				56B76F527BA1B0C195D380DB /* Frameworks */,
-				E1CA9D8D6D3EEF50A03E4E03 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -188,7 +204,7 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					1D9D0CF3C214130166213D80 = {
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 					};
 				};
 			};
@@ -215,11 +231,11 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		E1CA9D8D6D3EEF50A03E4E03 /* Resources */ = {
+		BFA5A0EE784FE6F59E5E0293 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1ACBC23C35215673E9B90181 /* Assets.xcassets in Resources */,
+				2F4FBDE851D54B016CEF3F69 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -233,6 +249,7 @@
 				7ABBC5C2A68F8EA5F8BB51B9 /* BurnRateRow.swift in Sources */,
 				A282993CC5DED1F7384854AF /* CCUsageClient.swift in Sources */,
 				43A6653D967FC59ABC91624E /* CadenceApp.swift in Sources */,
+				7175570421CC110614F336B9 /* ClaudeCredentials.swift in Sources */,
 				D6477690175FCD1DC963CEC5 /* Format.swift in Sources */,
 				928E7502E5F8F23B2FF35D1A /* GlassCard.swift in Sources */,
 				68267006B568B67E561FEECC /* MenuBarLabel.swift in Sources */,
@@ -241,6 +258,7 @@
 				A0AA3E15A34B9CC43EE9B293 /* PanelFooter.swift in Sources */,
 				9BA7B2865E7245719BA090D6 /* StatBlock.swift in Sources */,
 				13835933B28BB6176C7CA475 /* Usage.swift in Sources */,
+				4D8AC3FEE435984AE0039C8E /* UsageCache.swift in Sources */,
 				59AE75EE8C4367CCAC4CD6D5 /* UsageLimitsService.swift in Sources */,
 				0DA30D335C4F1CD7B452439F /* UsageMeter.swift in Sources */,
 				F10F9F9390B0F0C8421B2026 /* UsagePanelView.swift in Sources */,
@@ -281,6 +299,7 @@
 		};
 		9DBE9E0079A7DB194A03BF0C /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C178CF1055FB491A0D4328ED /* Signing.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOLS = NO;
@@ -313,7 +332,6 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -346,6 +364,7 @@
 		};
 		C78721ED836CA881972A504D /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C178CF1055FB491A0D4328ED /* Signing.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOLS = NO;
@@ -378,7 +397,6 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;

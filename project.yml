@@ -21,9 +21,15 @@ settings:
     INFOPLIST_FILE: Cadence/Resources/Info.plist
     ENABLE_HARDENED_RUNTIME: "NO"
     ENABLE_APP_SANDBOX: "NO"
-    CODE_SIGN_STYLE: Automatic
+    # Signing is deliberately NOT set here — build settings in this block would
+    # override the xcconfig below. See Cadence/Config/Signing.xcconfig for why a
+    # stable signature matters to Keychain access.
     PRODUCT_NAME: Cadence
     ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOLS: "NO"
+
+configFiles:
+  Debug: Cadence/Config/Signing.xcconfig
+  Release: Cadence/Config/Signing.xcconfig
 
 targets:
   Cadence:
@@ -31,6 +37,8 @@ targets:
     platform: macOS
     sources:
       - path: Cadence
+        excludes:
+          - "Config/*.xcconfig"
     dependencies:
       - package: DesignSystem
     settings:

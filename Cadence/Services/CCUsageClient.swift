@@ -7,6 +7,8 @@ enum CCUsageError: LocalizedError {
     case failed(String)
     /// Output could not be decoded as the expected JSON.
     case decode(String)
+    /// The process outlived its deadline and was killed.
+    case timedOut
 
     var errorDescription: String? {
         switch self {
@@ -16,7 +18,27 @@ enum CCUsageError: LocalizedError {
             return "ccusage failed: \(m)"
         case .decode(let m):
             return "Couldn't read ccusage output: \(m)"
+        case .timedOut:
+            return "ccusage took too long to respond."
         }
+    }
+}
+
+/// A one-way flag set from the watchdog queue and read from the worker thread.
+private final class Flag: @unchecked Sendable {
+    private let lock = NSLock()
+    private var value = false
+
+    func set() {
+        lock.lock()
+        value = true
+        lock.unlock()
+    }
+
+    var isSet: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return value
     }
 }
 
@@ -34,6 +56,11 @@ actor CCUsageClient {
     }
 
     private var command: Command?
+
+    /// Hard ceiling on a single invocation. Without this a wedged `node` would
+    /// leave the poll task suspended forever and the app would silently stop
+    /// updating until relaunched.
+    private static let processTimeout: TimeInterval = 30
 
     private static let decoder: JSONDecoder = {
         let d = JSONDecoder()
@@ -54,17 +81,23 @@ actor CCUsageClient {
 
     // MARK: - Public API
 
-    /// Fetches the active 5-hour block and the daily report concurrently.
-    func fetch() async throws -> (blocks: BlocksReport, daily: DailyReport) {
-        async let blocks: BlocksReport = run(["blocks", "--active", "--json"])
-        async let daily = fetchDaily()
-        return try await (blocks, daily)
+    /// The active 5-hour block. Cheap relative to the daily report, so this is
+    /// what the frequent poll uses.
+    ///
+    /// Note: ccusage's `--offline` flag would make this ~60x faster by skipping
+    /// the live pricing fetch, but its bundled pricing table doesn't cover
+    /// current models — every cost comes back as 0. Do not add it.
+    func fetchBlocks() async throws -> BlocksReport {
+        try await run(["blocks", "--active", "--json"])
     }
 
-    private func fetchDaily() async throws -> DailyReport {
+    /// The full daily report, including the per-model breakdown. Scans all
+    /// history and fetches live pricing, so it runs on a slower cadence.
+    func fetchDaily() async throws -> DailyReport {
         do {
             return try await run(["daily", "--json", "--breakdown"])
-        } catch CCUsageError.failed(let message) where message.localizedCaseInsensitiveContains("breakdown") {
+        } catch CCUsageError.failed(let message)
+            where message.localizedCaseInsensitiveContains("breakdown") {
             return try await run(["daily", "--json"])
         }
     }
@@ -131,11 +164,29 @@ actor CCUsageClient {
                     return
                 }
 
+                // Kill the process if it blows the deadline; the reads below then
+                // hit EOF and we report the timeout rather than hanging.
+                let killed = Flag()
+                let watchdog = DispatchWorkItem {
+                    guard process.isRunning else { return }
+                    killed.set()
+                    process.terminate()
+                }
+                DispatchQueue.global().asyncAfter(
+                    deadline: .now() + Self.processTimeout,
+                    execute: watchdog
+                )
+
                 let outData = outPipe.fileHandleForReading.readDataToEndOfFile()
                 let errData = errPipe.fileHandleForReading.readDataToEndOfFile()
                 process.waitUntilExit()
+                watchdog.cancel()
 
                 if process.terminationStatus != 0 {
+                    if killed.isSet {
+                        continuation.resume(throwing: CCUsageError.timedOut)
+                        return
+                    }
                     let msg = String(data: errData, encoding: .utf8)?
                         .trimmingCharacters(in: .whitespacesAndNewlines)
                     continuation.resume(throwing: CCUsageError.failed(

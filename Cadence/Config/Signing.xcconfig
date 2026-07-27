@@ -1,0 +1,27 @@
+// Code signing.
+//
+// Default is ad-hoc, which needs no certificate and is what CI ships.
+//
+// Ad-hoc has one important cost for local development: the signature's
+// designated requirement is a bare cdhash, so every rebuild produces a
+// signature macOS considers a *different* app. Cadence reads Claude Code's
+// OAuth token from the Keychain, and that item's ACL is keyed on the
+// designated requirement — so with ad-hoc signing, "Always Allow" is
+// forgotten on every rebuild and the system panel comes back.
+//
+// Signing with a stable developer certificate fixes that. To do it, create
+// Local.xcconfig next to this file (it is gitignored):
+//
+//     CODE_SIGN_IDENTITY = <your certificate's SHA-1 hash>
+//     DEVELOPMENT_TEAM = <your team ID>
+//
+// Get the hash from: security find-identity -v -p codesigning
+// Use the hash rather than "Apple Development" — for macOS targets Xcode
+// resolves that name to "Mac Development" and fails to match the certificate.
+
+CODE_SIGN_STYLE = Manual
+CODE_SIGN_IDENTITY = -
+CODE_SIGNING_REQUIRED = NO
+PROVISIONING_PROFILE_SPECIFIER =
+
+#include? "Local.xcconfig"

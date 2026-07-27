@@ -49,11 +49,14 @@ enum Format {
         return f.string(from: date)
     }
 
-    /// `Updated 14:32` — last refresh stamp for the footer.
+    /// `Updated 14:32` — last refresh stamp for the footer. Once the stamp is no
+    /// longer from today the weekday is included: values restored from a previous
+    /// session, or an app left running past midnight, would otherwise show a bare
+    /// time that reads as "just now".
     static func updatedAt(_ date: Date?) -> String {
         guard let date else { return "—" }
         let f = DateFormatter()
-        f.dateFormat = "HH:mm"
+        f.dateFormat = Calendar.current.isDateInToday(date) ? "HH:mm" : "E HH:mm"
         return "Updated \(f.string(from: date))"
     }
 }

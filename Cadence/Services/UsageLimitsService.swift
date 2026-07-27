@@ -1,32 +1,114 @@
 import Foundation
-import Security
+
+/// Why real plan limits aren't available, when they aren't.
+enum LimitsUnavailable: Error, Equatable {
+    /// Keychain access to Claude Code's token needs the user's approval.
+    case needsKeychainPermission
+    /// Claude Code isn't logged in on this machine.
+    case notLoggedIn
+    /// Token was rejected by the API — Claude Code likely re-authenticated.
+    case tokenRejected
+    /// Network or server problem; worth retrying.
+    case unreachable
+}
 
 /// Fetches real plan-limit utilization — the same numbers Claude Code's `/usage`
 /// shows — by reusing Claude Code's stored OAuth token to call the endpoint it
 /// uses internally: `GET https://api.anthropic.com/api/oauth/usage`.
 ///
-/// Everything is best-effort: any missing token / network / shape problem
-/// returns `nil`, and the UI falls back to its time-based bars.
+/// The token is cached in memory after the first successful read so routine
+/// polling never touches the Keychain. We only go back to the Keychain when we
+/// have no token or the API rejects the one we hold.
 actor UsageLimitsService {
 
     private static let endpoint = URL(string: "https://api.anthropic.com/api/oauth/usage")!
 
-    func fetch() async -> UsageLimits? {
-        guard let token = ClaudeCredentials.accessToken() else { return nil }
+    private var cachedToken: String?
 
+    /// Fetches limits, reading the Keychain silently if a token is needed.
+    func fetch() async -> Result<UsageLimits, LimitsUnavailable> {
+        await fetch(interactive: false)
+    }
+
+    /// Same, but permitted to raise the system Keychain panel. Call only from a
+    /// user-initiated action.
+    func fetchAllowingPrompt() async -> Result<UsageLimits, LimitsUnavailable> {
+        // Force a fresh read so the prompt actually appears for the user.
+        cachedToken = nil
+        return await fetch(interactive: true)
+    }
+
+    private func fetch(interactive: Bool) async -> Result<UsageLimits, LimitsUnavailable> {
+        let token: String
+        switch currentToken(interactive: interactive) {
+        case .success(let t): token = t
+        case .failure(let problem): return .failure(problem)
+        }
+
+        switch await request(token: token) {
+        case .success(let limits):
+            return .success(limits)
+
+        case .failure(.tokenRejected):
+            // Claude Code rotates this token; a 401 means ours went stale, so
+            // drop it and take exactly one more Keychain read to pick up the
+            // replacement. Silent — a rotation must not spawn a dialog.
+            cachedToken = nil
+            guard case .token(let fresh) = ClaudeCredentials.read(), fresh != token else {
+                return .failure(.tokenRejected)
+            }
+            cachedToken = fresh
+            return await request(token: fresh)
+
+        case .failure(let other):
+            return .failure(other)
+        }
+    }
+
+    /// Returns the cached token, reading the Keychain only when we don't hold one.
+    /// Reads exactly once — in the interactive case a second read would mean a
+    /// second system panel.
+    private func currentToken(interactive: Bool) -> Result<String, LimitsUnavailable> {
+        if let cachedToken { return .success(cachedToken) }
+
+        let result = interactive
+            ? ClaudeCredentials.readInteractively()
+            : ClaudeCredentials.read()
+
+        switch result {
+        case .token(let token):
+            cachedToken = token
+            return .success(token)
+        case .needsPermission:
+            return .failure(.needsKeychainPermission)
+        case .missing, .unreadable:
+            return .failure(.notLoggedIn)
+        }
+    }
+
+    private func request(token: String) async -> Result<UsageLimits, LimitsUnavailable> {
         var request = URLRequest(url: Self.endpoint)
         request.httpMethod = "GET"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("oauth-2025-04-20", forHTTPHeaderField: "anthropic-beta")
         request.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
         request.timeoutInterval = 15
+        request.cachePolicy = .reloadIgnoringLocalCacheData
 
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
-            guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { return nil }
-            return Self.parse(data)
+            guard let http = response as? HTTPURLResponse else { return .failure(.unreachable) }
+            switch http.statusCode {
+            case 200:
+                guard let limits = Self.parse(data) else { return .failure(.unreachable) }
+                return .success(limits)
+            case 401, 403:
+                return .failure(.tokenRejected)
+            default:
+                return .failure(.unreachable)
+            }
         } catch {
-            return nil
+            return .failure(.unreachable)
         }
     }
 
@@ -36,11 +118,15 @@ actor UsageLimitsService {
         guard let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             return nil
         }
-        return UsageLimits(
+        let limits = UsageLimits(
             fiveHour: window(root["five_hour"]),
             sevenDay: window(root["seven_day"]),
             sevenDayOpus: window(root["seven_day_opus"])
         )
+        // An all-nil parse means the shape changed; treat it as a failure so we
+        // keep showing the last good values instead of blanking the bars.
+        guard limits.fiveHour != nil || limits.sevenDay != nil else { return nil }
+        return limits
     }
 
     private static func window(_ any: Any?) -> LimitWindow? {
@@ -60,28 +146,5 @@ actor UsageLimitsService {
         let noFrac = ISO8601DateFormatter()
         noFrac.formatOptions = [.withInternetDateTime]
         return noFrac.date(from: s)
-    }
-}
-
-/// Reads Claude Code's OAuth access token from the macOS Keychain
-/// (`Claude Code-credentials`). The first read triggers a one-time system
-/// "allow access" prompt; choosing "Always Allow" makes later reads silent.
-enum ClaudeCredentials {
-    static func accessToken() -> String? {
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: "Claude Code-credentials",
-            kSecReturnData as String: true,
-            kSecMatchLimit as String: kSecMatchLimitOne,
-        ]
-        var item: CFTypeRef?
-        guard SecItemCopyMatching(query as CFDictionary, &item) == errSecSuccess,
-              let data = item as? Data,
-              let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-        else { return nil }
-
-        // Stored as {"claudeAiOauth": {"accessToken": ...}}; tolerate a flat shape too.
-        let oauth = (root["claudeAiOauth"] as? [String: Any]) ?? root
-        return oauth["accessToken"] as? String
     }
 }

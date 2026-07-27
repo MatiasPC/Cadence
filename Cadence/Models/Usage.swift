@@ -219,13 +219,13 @@ struct Totals: Decodable {
 // MARK: - Real plan-limit usage (Claude Code's /api/oauth/usage)
 
 /// Plan-limit utilization for the rolling windows Claude Code's `/usage` shows.
-struct UsageLimits: Equatable {
+struct UsageLimits: Equatable, Codable {
     var fiveHour: LimitWindow?
     var sevenDay: LimitWindow?
     var sevenDayOpus: LimitWindow?
 }
 
-struct LimitWindow: Equatable {
+struct LimitWindow: Equatable, Codable {
     /// 0...1 fraction of the window's limit consumed.
     let utilization: Double
     let resetsAt: Date?
@@ -233,7 +233,7 @@ struct LimitWindow: Equatable {
 
 // MARK: - Model families (for the Opus/Sonnet split)
 
-enum ModelFamily: String, CaseIterable {
+enum ModelFamily: String, CaseIterable, Codable {
     case opus = "Opus"
     case sonnet = "Sonnet"
     case haiku = "Haiku"
@@ -249,7 +249,7 @@ enum ModelFamily: String, CaseIterable {
 }
 
 /// A single model's share of today's spend, ready for the split bar.
-struct ModelShare: Identifiable {
+struct ModelShare: Identifiable, Codable {
     let family: ModelFamily
     let cost: Double
     let tokens: Int
@@ -260,7 +260,7 @@ struct ModelShare: Identifiable {
 
 /// Everything the panel needs, assembled from the two ccusage reports.
 /// `UsageStore` produces this; the views only ever read it.
-struct UsageSnapshot: Equatable {
+struct UsageSnapshot: Equatable, Codable {
     var block: BlockView?
     var todayCost: Double = 0
     var todayTokens: Int = 0
@@ -296,7 +296,7 @@ struct UsageSnapshot: Equatable {
 }
 
 /// Flattened, view-friendly projection of the active block.
-struct BlockView: Equatable {
+struct BlockView: Equatable, Codable {
     let cost: Double
     let tokens: Int
     let startTime: Date

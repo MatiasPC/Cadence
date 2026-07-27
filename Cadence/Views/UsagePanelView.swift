@@ -86,8 +86,32 @@ struct UsagePanelView: View {
 
     private var fullContent: some View {
         VStack(spacing: DSSpacing.sm) {
+            if store.needsKeychainPermission {
+                keychainPermissionCard
+            }
             sessionCard
             weekCard
+        }
+    }
+
+    /// Real plan limits need Claude Code's Keychain token. Reads are silent, so
+    /// this row is the only place the system panel can be triggered — the user
+    /// decides when to see it instead of it interrupting them mid-work.
+    private var keychainPermissionCard: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: DSSpacing.xs) {
+                Text("SHOWING TIME ESTIMATES")
+                    .dsTextStyle(.caption1, color: PanelColor.textSecondary)
+
+                Text("Allow Keychain access to show your real plan limits.")
+                    .dsTextStyle(.caption2, color: PanelColor.textTertiary)
+
+                Button("Allow access") {
+                    Task { await store.grantKeychainAccess() }
+                }
+                .buttonStyle(.glass)
+                .controlSize(.small)
+            }
         }
     }
 

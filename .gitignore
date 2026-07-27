@@ -25,3 +25,6 @@ Cadence.xcodeproj/project.xcworkspace/xcuserdata/
 
 # Release build artifacts (never commit binaries)
 Cadence.zip
+
+# Local signing identity (machine-specific)
+Cadence/Config/Local.xcconfig
