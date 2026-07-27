@@ -22,7 +22,8 @@ ccusage daily --json --breakdown        # every 5 min
 ```
 
 - Arguments are passed as an **array**, never interpolated into a shell string — there is no command-injection surface.
-- The one shell invocation is a fixed literal used only to *locate* the binary (`command -v ccusage || command -v npx`); it contains no user or external input. It runs through your login shell, so it sources your `~/.zshrc` — that is your own configuration, but it is why Cadence cannot be sandboxed.
+- The one shell invocation is a fixed literal used only to *locate* the binary (`command -v ccusage || command -v npx`); it contains no user or external input. It runs as an interactive login shell (`zsh -ilc`) so that it sources your `~/.zshrc` and can therefore see Node version managers (nvm, fnm, volta, asdf) that install outside any system directory. That means Cadence executes your own shell configuration — which is yours, not ours, but it is worth knowing, and it is part of why Cadence cannot be sandboxed.
+- If the shell reveals nothing, Cadence falls back to checking a fixed list of known install directories. It never executes anything it finds there beyond `ccusage`/`npx` itself.
 - A run that exceeds 30 seconds is killed, so a wedged `node` can't leave the app hanging.
 - See [`Cadence/Services/CCUsageClient.swift`](Cadence/Services/CCUsageClient.swift).
 

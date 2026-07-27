@@ -1,8 +1,10 @@
 import Foundation
 
 enum CCUsageError: LocalizedError {
-    /// Neither a global `ccusage` nor `npx` could be found.
-    case notFound
+    /// Neither a global `ccusage` nor `npx` could be found. Carries the
+    /// directories actually searched — "install Node" is unhelpful advice when
+    /// Node is plainly installed but lives somewhere we didn't look.
+    case notFound(searched: [String])
     /// The process ran but exited non-zero (message is stderr).
     case failed(String)
     /// Output could not be decoded as the expected JSON.
@@ -12,8 +14,9 @@ enum CCUsageError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .notFound:
-            return "ccusage not found. Install Node, then run: npm install -g ccusage"
+        case .notFound(let searched):
+            let where_ = searched.isEmpty ? "" : "\nLooked in: \(searched.joined(separator: ", "))"
+            return "Couldn't find ccusage or npx.\(where_)"
         case .failed(let m):
             return "ccusage failed: \(m)"
         case .decode(let m):
@@ -44,16 +47,52 @@ private final class Flag: @unchecked Sendable {
 
 /// Runs the `ccusage` CLI and decodes its JSON.
 ///
-/// A launched `.app` inherits a minimal PATH, so on first use we resolve the
-/// binary through a login shell (`command -v ccusage || command -v npx`) and
-/// cache the result. A global `ccusage` is preferred; otherwise we fall back to
-/// `npx --yes ccusage`, which is slower on the first call but needs no install.
+/// Finding the binary is the hard part. An app launched from Finder inherits
+/// launchd's `PATH` — typically just `/usr/bin:/bin:/usr/sbin:/sbin` — which
+/// contains no Node installation of any kind. Worse, that inherited `PATH` can
+/// be widened for a session (a `launchctl setenv` from a dotfile, say) and then
+/// silently revert on the next reboot, which makes the app look like it "broke
+/// after a restart".
+///
+/// So resolution never trusts the inherited environment. It asks the user's
+/// shell, and falls back to probing known install locations:
+///
+///   1. `zsh -ilc` — **interactive** login shell. The `-i` matters: version
+///      managers (nvm, fnm, volta, asdf, mise) initialize in `.zshrc`, and zsh
+///      only sources `.zshrc` for interactive shells. A plain `-lc` sees
+///      `.zprofile` but not `.zshrc`, so it misses them entirely.
+///   2. `zsh -lc` — in case an exotic `.zshrc` misbehaves without a tty.
+///   3. A direct scan of well-known directories, including nvm's versioned
+///      ones, for setups where the shell tells us nothing.
+///
+/// The shell's own `PATH` is captured alongside the binary, because `ccusage`
+/// is a Node script starting `#!/usr/bin/env node`. Finding it is not enough —
+/// `node` has to be on the `PATH` we hand the child process, or it dies at the
+/// shebang.
 actor CCUsageClient {
 
     private struct Command {
         let launchPath: String
         let leadingArgs: [String]
+        /// `PATH` for the child, so its `env node` shebang resolves.
+        let searchPATH: String
     }
+
+    /// Marker prefixes so a chatty `.zshrc` (banners, fastfetch, version
+    /// notices) can't be mistaken for output. The previous implementation took
+    /// the first line of stdout, which any such profile would have broken.
+    private static let cmdMarker = "<<<CADENCE-CMD>>>"
+    private static let pathMarker = "<<<CADENCE-PATH>>>"
+
+    /// Always searched, regardless of what the shell reports: Homebrew on both
+    /// architectures, the official Node installer, and MacPorts.
+    private static let baseDirectories = [
+        "/opt/homebrew/bin",
+        "/usr/local/bin",
+        "/opt/local/bin",
+        "/usr/bin",
+        "/bin",
+    ]
 
     private var command: Command?
 
@@ -106,29 +145,123 @@ actor CCUsageClient {
 
     private func resolvedCommand() async throws -> Command {
         if let command { return command }
+
+        // Interactive first so `.zshrc` (and any version manager in it) is read.
+        for shellArgs in [["-ilc"], ["-lc"]] {
+            if let found = try? await askShell(shellArgs) {
+                command = found
+                return found
+            }
+        }
+
+        if let found = probeKnownDirectories() {
+            command = found
+            return found
+        }
+
+        throw CCUsageError.notFound(searched: searchedDirectories())
+    }
+
+    /// Asks a shell where `ccusage` (or `npx`) lives, and what its `PATH` is.
+    private func askShell(_ shellArgs: [String]) async throws -> Command {
+        let script = """
+        cmd=$(command -v ccusage 2>/dev/null || command -v npx 2>/dev/null || true)
+        printf '%s%s\\n' '\(Self.cmdMarker)' "$cmd"
+        printf '%s%s\\n' '\(Self.pathMarker)' "$PATH"
+        """
         let data = try await runRaw(
             launchPath: "/bin/zsh",
-            args: ["-lc", "command -v ccusage || command -v npx"]
+            args: shellArgs + [script],
+            searchPATH: Self.baseDirectories.joined(separator: ":")
         )
-        let path = String(decoding: data, as: UTF8.self)
-            .split(whereSeparator: \.isNewline)
-            .first
-            .map(String.init)?
-            .trimmingCharacters(in: .whitespaces) ?? ""
-        guard !path.isEmpty else { throw CCUsageError.notFound }
+        let lines = String(decoding: data, as: UTF8.self).split(whereSeparator: \.isNewline)
 
-        let resolved: Command = path.hasSuffix("/ccusage")
-            ? Command(launchPath: path, leadingArgs: [])
-            : Command(launchPath: path, leadingArgs: ["--yes", "ccusage"])
-        command = resolved
-        return resolved
+        func value(after marker: String) -> String? {
+            lines.last { $0.hasPrefix(marker) }
+                .map { String($0.dropFirst(marker.count)).trimmingCharacters(in: .whitespaces) }
+        }
+
+        guard let binary = value(after: Self.cmdMarker), !binary.isEmpty,
+              FileManager.default.isExecutableFile(atPath: binary)
+        else { throw CCUsageError.notFound(searched: []) }
+
+        let shellPATH = value(after: Self.pathMarker) ?? ""
+        return makeCommand(binary: binary, extraPATH: shellPATH)
+    }
+
+    /// Last resort: look directly where Node tends to install things, for setups
+    /// where the shell reports nothing useful.
+    private func probeKnownDirectories() -> Command? {
+        let fm = FileManager.default
+        for directory in searchedDirectories() {
+            // A global ccusage beats npx, which would re-download on every miss.
+            for name in ["ccusage", "npx"] {
+                let candidate = (directory as NSString).appendingPathComponent(name)
+                if fm.isExecutableFile(atPath: candidate) {
+                    return makeCommand(binary: candidate, extraPATH: directory)
+                }
+            }
+        }
+        return nil
+    }
+
+    private func makeCommand(binary: String, extraPATH: String) -> Command {
+        // The binary's own directory must be on PATH so `env node` resolves.
+        let ownDirectory = (binary as NSString).deletingLastPathComponent
+        let parts = [extraPATH, ownDirectory] + Self.baseDirectories
+        var seen = Set<String>()
+        let path = parts
+            .flatMap { $0.split(separator: ":").map(String.init) }
+            .filter { !$0.isEmpty && seen.insert($0).inserted }
+            .joined(separator: ":")
+
+        return binary.hasSuffix("/ccusage")
+            ? Command(launchPath: binary, leadingArgs: [], searchPATH: path)
+            : Command(launchPath: binary, leadingArgs: ["--yes", "ccusage"], searchPATH: path)
+    }
+
+    /// Known install locations, most specific first. Version managers keep their
+    /// shims outside any system directory, which is exactly why a launchd `PATH`
+    /// never contains them.
+    private func searchedDirectories() -> [String] {
+        let home = FileManager.default.homeDirectoryForCurrentUser.path
+        var directories = [
+            "\(home)/.volta/bin",
+            "\(home)/.bun/bin",
+            "\(home)/.asdf/shims",
+            "\(home)/.local/share/fnm/aliases/default/bin",
+            "\(home)/.npm-global/bin",
+            "\(home)/.local/bin",
+        ]
+        directories.append(contentsOf: nvmDirectories(home: home))
+        directories.append(contentsOf: Self.baseDirectories)
+        return directories
+    }
+
+    /// nvm installs per version under `~/.nvm/versions/node/<version>/bin` with
+    /// no stable path, so prefer its `default` alias and otherwise take the
+    /// highest version number.
+    private func nvmDirectories(home: String) -> [String] {
+        let root = "\(home)/.nvm/versions/node"
+        guard let versions = try? FileManager.default.contentsOfDirectory(atPath: root),
+              !versions.isEmpty
+        else { return [] }
+
+        let sorted = versions.sorted {
+            $0.compare($1, options: .numeric) == .orderedDescending
+        }
+        return sorted.map { "\(root)/\($0)/bin" }
     }
 
     // MARK: - Process execution
 
     private func run<T: Decodable>(_ args: [String]) async throws -> T {
         let cmd = try await resolvedCommand()
-        let data = try await runRaw(launchPath: cmd.launchPath, args: cmd.leadingArgs + args)
+        let data = try await runRaw(
+            launchPath: cmd.launchPath,
+            args: cmd.leadingArgs + args,
+            searchPATH: cmd.searchPATH
+        )
         do {
             return try Self.decoder.decode(T.self, from: data)
         } catch {
@@ -139,17 +272,24 @@ actor CCUsageClient {
     /// Launches a process off the actor's executor and returns its stdout.
     /// stdout is drained on a background thread before `waitUntilExit` to avoid
     /// a pipe-buffer deadlock on large JSON payloads.
-    private func runRaw(launchPath: String, args: [String]) async throws -> Data {
+    private func runRaw(
+        launchPath: String,
+        args: [String],
+        searchPATH: String
+    ) async throws -> Data {
         try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 let process = Process()
                 process.executableURL = URL(fileURLWithPath: launchPath)
                 process.arguments = args
 
-                // Ensure node (and npx) are discoverable regardless of the app's PATH.
+                // `searchPATH` leads, since it came from the user's own shell or
+                // from wherever the binary was actually found. The inherited
+                // PATH is appended rather than trusted — under launchd it holds
+                // no Node at all, and its contents vary between reboots.
                 var env = ProcessInfo.processInfo.environment
-                let extras = "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin"
-                env["PATH"] = env["PATH"].map { "\($0):\(extras)" } ?? extras
+                let inherited = env["PATH"].map { ":\($0)" } ?? ""
+                env["PATH"] = searchPATH + inherited
                 process.environment = env
 
                 let outPipe = Pipe()
