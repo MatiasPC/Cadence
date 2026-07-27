@@ -14,10 +14,12 @@
 	<string>Cadence</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+	<!-- Both come from project.yml so the bundle can't drift from the release
+	     tag. Hardcoding them once shipped a "v2.2" build reporting 2.1. -->
 	<key>CFBundleShortVersionString</key>
-	<string>2.1</string>
+	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>26.0</string>
 	<key>LSUIElement</key>
