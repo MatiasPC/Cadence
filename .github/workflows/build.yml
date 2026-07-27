@@ -149,11 +149,48 @@ jobs:
 
           # notarytool takes an archive, but the ticket staples to the .app.
           ditto -c -k --sequesterRsrc --keepParent "$APP" notarize.zip
-          xcrun notarytool submit notarize.zip \
+
+          # Submit without --wait so we keep the submission ID. A rejection is
+          # reported by Apple as a bare "Invalid" with the reason only in the
+          # notary log, so that log has to be fetched explicitly — otherwise a
+          # failure here tells you nothing about what to fix.
+          SUBMISSION_ID="$(
+            xcrun notarytool submit notarize.zip \
+              --apple-id "$APPLE_ID" \
+              --password "$APPLE_APP_PASSWORD" \
+              --team-id "$TEAM_ID" \
+              --output-format json \
+            | python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])'
+          )"
+          echo "Submission ID: $SUBMISSION_ID"
+
+          set +e
+          xcrun notarytool wait "$SUBMISSION_ID" \
             --apple-id "$APPLE_ID" \
             --password "$APPLE_APP_PASSWORD" \
             --team-id "$TEAM_ID" \
-            --wait --timeout 30m
+            --timeout 30m
+          set -e
+
+          STATUS="$(
+            xcrun notarytool info "$SUBMISSION_ID" \
+              --apple-id "$APPLE_ID" \
+              --password "$APPLE_APP_PASSWORD" \
+              --team-id "$TEAM_ID" \
+              --output-format json \
+            | python3 -c 'import json,sys; print(json.load(sys.stdin)["status"])'
+          )"
+
+          if [ "$STATUS" != "Accepted" ]; then
+            echo "::group::Apple notary log ($STATUS)"
+            xcrun notarytool log "$SUBMISSION_ID" \
+              --apple-id "$APPLE_ID" \
+              --password "$APPLE_APP_PASSWORD" \
+              --team-id "$TEAM_ID" || true
+            echo "::endgroup::"
+            echo "::error::Notarization returned $STATUS. See the notary log above."
+            exit 1
+          fi
           rm -f notarize.zip
 
           xcrun stapler staple "$APP"
