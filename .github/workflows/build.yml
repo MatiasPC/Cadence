@@ -226,3 +226,71 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release upload "${{ github.event.release.tag_name }}" Cadence.zip --clobber
+
+  # The Homebrew cask lives in a separate repo and does not follow releases on
+  # its own. Left manual it silently served 2.1 for two releases, so it is
+  # automated here and fails loudly rather than lagging quietly.
+  update-tap:
+    name: Update Homebrew cask
+    needs: build
+    if: github.event_name == 'release' && github.event.release.prerelease == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Bump cask to the released version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAP_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${TAP_TOKEN:-}" ]; then
+            echo "::error::TAP_GITHUB_TOKEN is not set, so the cask would stay on the previous version. Create a fine-grained PAT with Contents:write on MatiasPC/homebrew-tap and add it as a secret."
+            exit 1
+          fi
+
+          VERSION="${TAG#v}"
+
+          # Checksum the asset the release actually serves, not a local rebuild —
+          # a mismatch here is what breaks `brew install` for everyone.
+          for attempt in 1 2 3 4 5; do
+            if gh release download "$TAG" -R "$GITHUB_REPOSITORY" -p Cadence.zip --clobber; then
+              break
+            fi
+            echo "Asset not published yet (attempt $attempt); waiting..."
+            sleep 10
+          done
+          if [ ! -f Cadence.zip ]; then
+            echo "::error::Cadence.zip was never published on release $TAG."
+            exit 1
+          fi
+
+          SHA="$(sha256sum Cadence.zip | cut -d' ' -f1)"
+          echo "Releasing version $VERSION with sha256 $SHA"
+
+          git clone --depth 1 \
+            "https://x-access-token:${TAP_TOKEN}@github.com/MatiasPC/homebrew-tap.git" tap
+          cd tap
+          CASK="Casks/cadence.rb"
+
+          # Rewrite only the two pinned lines; the rest of the cask is
+          # hand-maintained and has to survive untouched.
+          sed -i -E "s|^([[:space:]]*version[[:space:]]+)\"[^\"]*\"|\1\"${VERSION}\"|" "$CASK"
+          sed -i -E "s|^([[:space:]]*sha256[[:space:]]+)\"[^\"]*\"|\1\"${SHA}\"|" "$CASK"
+
+          if ! grep -q "version \"${VERSION}\"" "$CASK" || ! grep -q "sha256 \"${SHA}\"" "$CASK"; then
+            echo "::error::Cask rewrite did not take. Its format may have changed."
+            cat "$CASK"
+            exit 1
+          fi
+
+          if git diff --quiet; then
+            echo "Cask already at $VERSION; nothing to push."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -qam "Update Cadence to ${VERSION}"
+          git push
+          echo "Homebrew cask updated to $VERSION."
