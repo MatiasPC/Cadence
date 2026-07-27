@@ -26,6 +26,14 @@ settings:
     # stable signature matters to Keychain access.
     PRODUCT_NAME: Cadence
     ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOLS: "NO"
+  configs:
+    Release:
+      # Xcode injects com.apple.security.get-task-allow — the entitlement that
+      # lets a debugger attach — into every build by default. Apple rejects
+      # notarization outright when it's present ("The executable requests the
+      # com.apple.security.get-task-allow entitlement"), and a Release build
+      # has no business being debuggable anyway. Debug keeps it.
+      CODE_SIGN_INJECT_BASE_ENTITLEMENTS: "NO"
 
 configFiles:
   Debug: Cadence/Config/Signing.xcconfig
